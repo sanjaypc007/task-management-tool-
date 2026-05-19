@@ -10,6 +10,13 @@ import { readJsonBody, sendJson } from "../_lib/http";
 
 const TASKS_COLLECTION = "tasks";
 const ALLOWED_STATUSES = ["Planned", "In Progress", "Complete"];
+const ALLOWED_PRIORITIES = ["High", "Medium", "Low"];
+
+const normalizePriority = (priority) => {
+  const candidate = typeof priority === "string" ? priority.trim() : "";
+  if (!candidate) return "Medium";
+  return ALLOWED_PRIORITIES.includes(candidate) ? candidate : "Medium";
+};
 
 const normalizeFirestoreTask = (docSnap) => {
   const data = docSnap.data();
@@ -19,6 +26,7 @@ const normalizeFirestoreTask = (docSnap) => {
     id: docSnap.id,
     title: data.title,
     status: data.status,
+    priority: normalizePriority(data.priority),
     userId: data.userId,
     createdAt: createdAtIso,
   };
@@ -56,14 +64,32 @@ export default async function handler(req, res) {
         });
       }
 
+      const priorityRaw = typeof body.priority === "string" ? body.priority.trim() : "";
+      if (body.priority != null && priorityRaw && !ALLOWED_PRIORITIES.includes(priorityRaw)) {
+        return sendJson(res, 400, {
+          error: `Validation error - priority must be one of: ${ALLOWED_PRIORITIES.join(
+            ", "
+          )}.`,
+        });
+      }
+
+      const priority = normalizePriority(body.priority);
+
       const docRef = await adminDb.collection(TASKS_COLLECTION).add({
         title,
         status: "Planned",
+        priority,
         userId: uid,
         createdAt: adminFieldValue.serverTimestamp(),
       });
 
-      return sendJson(res, 201, { id: docRef.id, title, status: "Planned", userId: uid });
+      return sendJson(res, 201, {
+        id: docRef.id,
+        title,
+        status: "Planned",
+        priority,
+        userId: uid,
+      });
     }
 
     res.setHeader("Allow", "GET, POST");

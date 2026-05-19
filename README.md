@@ -8,8 +8,12 @@ A task management web app with Google sign-in, Firestore-backed tasks (real-time
 - Create tasks (title only)
 - Real-time task list per user (Firestore `onSnapshot`)
 - Update status: `Planned` | `In Progress` | `Complete`
+- Task priority: `High` | `Medium` | `Low`
 - Delete tasks (with confirmation)
 - Usability enhancements: status colors + dot, summary counts, empty/loading states, completed strikethrough
+- Filter bar, search, and sort options (client-side)
+- Dashboard card + progress bar + completion donut chart
+- Toast notifications for create/update/delete
 - In-app API docs via Swagger UI
 
 ## Tech Stack
@@ -61,7 +65,7 @@ Base URL (local):
 
 Endpoints:
 - `GET /api/tasks` (auth required)
-- `POST /api/tasks` (auth required) — body: `{ "title": "..." }`
+- `POST /api/tasks` (auth required) — body: `{ "title": "...", "priority": "High" | "Medium" | "Low" }` (priority optional)
 - `PATCH /api/tasks/:id/status` (auth required) — body: `{ "status": "Planned" | "In Progress" | "Complete" }`
 - `DELETE /api/tasks/:id` (auth required)
 
@@ -108,6 +112,7 @@ Firestore collection: `tasks`
   id: string,
   title: string, // max 200 chars
   status: "Planned" | "In Progress" | "Complete",
+  priority: "High" | "Medium" | "Low",
   userId: string,
   createdAt: Timestamp
 }

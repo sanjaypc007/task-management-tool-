@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		--status-planned: theme(colors.gray.400);
+		--status-in-progress: theme(colors.amber.500);
+		--status-complete: theme(colors.green.500);
+	}
+}

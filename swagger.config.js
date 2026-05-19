@@ -39,6 +39,11 @@ export const swaggerDefinition = {
             type: "string",
             enum: ["Planned", "In Progress", "Complete"],
           },
+          priority: {
+            type: "string",
+            enum: ["High", "Medium", "Low"],
+            description: "Task priority",
+          },
           userId: { type: "string", description: "Firebase Auth UID" },
           createdAt: { type: "string", format: "date-time" },
         },
@@ -75,6 +80,11 @@ export const swaggerSpec = {
                     type: "string",
                     maxLength: 200,
                     description: "Task title text",
+                  },
+                  priority: {
+                    type: "string",
+                    enum: ["High", "Medium", "Low"],
+                    description: "Optional task priority (defaults to Medium)",
                   },
                 },
               },

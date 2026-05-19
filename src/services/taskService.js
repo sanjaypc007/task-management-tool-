@@ -22,6 +22,7 @@ import { db } from "../firebase";
 
 const TASKS_COLLECTION = "tasks";
 const ALLOWED_STATUSES = ["Planned", "In Progress", "Complete"];
+const ALLOWED_PRIORITIES = ["High", "Medium", "Low"];
 
 const validateUserId = (userId) => {
   if (!userId || typeof userId !== "string") {
@@ -47,6 +48,22 @@ const validateStatus = (status) => {
   if (!ALLOWED_STATUSES.includes(status)) {
     throw new Error(
       `Validation error - status must be one of: ${ALLOWED_STATUSES.join(
+        ", "
+      )}.`
+    );
+  }
+};
+
+const normalizePriority = (priority) => {
+  const candidate = typeof priority === "string" ? priority.trim() : "";
+  if (!candidate) return "Medium";
+  return ALLOWED_PRIORITIES.includes(candidate) ? candidate : "Medium";
+};
+
+const validatePriority = (priority) => {
+  if (!ALLOWED_PRIORITIES.includes(priority)) {
+    throw new Error(
+      `Validation error - priority must be one of: ${ALLOWED_PRIORITIES.join(
         ", "
       )}.`
     );
@@ -85,14 +102,17 @@ const validateStatus = (status) => {
  *       500:
  *         description: Firestore write error
  */
-export const createTask = async (userId, title) => {
+export const createTask = async (userId, title, priority = "Medium") => {
   try {
     validateUserId(userId);
     const validatedTitle = validateTitle(title);
+    const normalizedPriority = normalizePriority(priority);
+    validatePriority(normalizedPriority);
 
     const docRef = await addDoc(collection(db, TASKS_COLLECTION), {
       title: validatedTitle,
       status: "Planned",
+      priority: normalizedPriority,
       userId,
       createdAt: serverTimestamp(),
     });
@@ -148,10 +168,14 @@ export const getUserTasks = (userId, callback, errorCallback) => {
       tasksQuery,
       (snapshot) => {
         try {
-          const tasks = snapshot.docs.map((taskDoc) => ({
-            id: taskDoc.id,
-            ...taskDoc.data(),
-          }));
+          const tasks = snapshot.docs.map((taskDoc) => {
+            const data = taskDoc.data();
+            return {
+              id: taskDoc.id,
+              ...data,
+              priority: normalizePriority(data?.priority),
+            };
+          });
 
           callback(tasks);
         } catch (error) {

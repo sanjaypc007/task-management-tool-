@@ -8,10 +8,15 @@
  */
 
 import { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 
 import { deleteTask, updateTaskStatus } from "../services/taskService";
 
 const STATUS_OPTIONS = ["Planned", "In Progress", "Complete"];
+const PRIORITY_OPTIONS = ["High", "Medium", "Low"];
+
+const normalizePriority = (priority) =>
+	PRIORITY_OPTIONS.includes(priority) ? priority : "Medium";
 
 const getStatusStyle = (status) => {
 	if (status === "Complete") {
@@ -60,8 +65,28 @@ const formatFirebaseErrorMessage = (error, fallbackMessage) => {
 	return errorCode ? `${baseMessage} (${errorCode})` : baseMessage;
 };
 
+const getPriorityStyle = (priority) => {
+	if (priority === "High") {
+		return {
+			badge: "bg-red-50 text-red-700 border-red-200",
+		};
+	}
+
+	if (priority === "Low") {
+		return {
+			badge: "bg-green-50 text-green-700 border-green-200",
+		};
+	}
+
+	return {
+		badge: "bg-amber-50 text-amber-700 border-amber-200",
+	};
+};
+
 export default function TaskCard({ task }) {
 	const { badge, dot } = useMemo(() => getStatusStyle(task.status), [task.status]);
+	const priority = normalizePriority(task.priority);
+	const priorityBadge = useMemo(() => getPriorityStyle(priority).badge, [priority]);
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
@@ -73,7 +98,9 @@ export default function TaskCard({ task }) {
 			setErrorMessage("");
 			setIsUpdating(true);
 			await updateTaskStatus(task.id, nextStatus);
+			toast.success(`Status updated to ${nextStatus}`);
 		} catch (error) {
+			toast.error("Failed to update status.");
 			setErrorMessage(
 				formatFirebaseErrorMessage(error, "Failed to update status. Please try again.")
 			);
@@ -90,7 +117,9 @@ export default function TaskCard({ task }) {
 			setErrorMessage("");
 			setIsDeleting(true);
 			await deleteTask(task.id);
+			toast("Task deleted", { icon: "🗑️" });
 		} catch (error) {
+			toast.error("Failed to delete task.");
 			setErrorMessage(
 				formatFirebaseErrorMessage(error, "Failed to delete task. Please try again.")
 			);
@@ -122,6 +151,12 @@ export default function TaskCard({ task }) {
 							className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${badge}`}
 						>
 							{task.status}
+						</span>
+						<span
+							className={`ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${priorityBadge}`}
+							aria-label={`Priority ${priority}`}
+						>
+							{priority} Priority
 						</span>
 					</div>
 				</div>

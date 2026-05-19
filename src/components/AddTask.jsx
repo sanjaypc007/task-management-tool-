@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 import { createTask } from "../services/taskService";
 
@@ -35,6 +36,7 @@ const formatFirebaseErrorMessage = (error, fallbackMessage) => {
 
 export default function AddTask({ userId }) {
 	const [title, setTitle] = useState("");
+	const [priority, setPriority] = useState("Medium");
 	const [errorMessage, setErrorMessage] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,9 +57,12 @@ export default function AddTask({ userId }) {
 		try {
 			setErrorMessage("");
 			setIsSubmitting(true);
-			await createTask(userId, trimmedTitle);
+			await createTask(userId, trimmedTitle, priority);
 			setTitle("");
+			setPriority("Medium");
+			toast.success("Task created!");
 		} catch (error) {
+			toast.error("Failed to create task.");
 			setErrorMessage(
 				formatFirebaseErrorMessage(error, "Failed to create task. Please try again.")
 			);
@@ -78,6 +83,18 @@ export default function AddTask({ userId }) {
 					className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-gray-900"
 					aria-label="Task title"
 				/>
+
+				<select
+					value={priority}
+					onChange={(event) => setPriority(event.target.value)}
+					disabled={isSubmitting}
+					className="rounded-lg border border-gray-300 bg-white px-2.5 py-2 text-sm outline-none focus:border-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+					aria-label="Task priority"
+				>
+					<option value="High">High</option>
+					<option value="Medium">Medium</option>
+					<option value="Low">Low</option>
+				</select>
 
 				<button
 					type="submit"

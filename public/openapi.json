@@ -28,6 +28,11 @@
             "type": "string",
             "enum": ["Planned", "In Progress", "Complete"]
           },
+          "priority": {
+            "type": "string",
+            "enum": ["High", "Medium", "Low"],
+            "description": "Task priority"
+          },
           "userId": { "type": "string", "description": "Firebase Auth UID" },
           "createdAt": { "type": "string", "format": "date-time" }
         }
@@ -53,12 +58,17 @@
                     "type": "string",
                     "maxLength": 200,
                     "description": "Task title text"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": ["High", "Medium", "Low"],
+                    "description": "Optional task priority (defaults to Medium)"
                   }
                 }
               },
               "examples": {
                 "CreateTask": {
-                  "value": { "title": "Buy groceries" }
+                  "value": { "title": "Buy groceries", "priority": "Medium" }
                 }
               }
             }
