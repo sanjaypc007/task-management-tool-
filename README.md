@@ -48,6 +48,36 @@ npm run dev
 
 Open the URL shown in the terminal.
 
+## Deploy to Vercel
+
+1) Import the GitHub repo into Vercel.
+2) Vercel should auto-detect **Vite**. If it asks:
+  - Build Command: `npm run build`
+  - Output Directory: `dist`
+3) Add **Environment Variables** in Vercel (Project → Settings → Environment Variables) for **Production** (and Preview if you use it):
+
+Frontend (Vite / client):
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+
+Backend (Vercel Functions under `/api/*`): choose ONE option:
+
+Option A (recommended)
+- `FIREBASE_SERVICE_ACCOUNT_KEY` = full Firebase service-account JSON (valid JSON string)
+
+Option B
+- `FIREBASE_ADMIN_PROJECT_ID`
+- `FIREBASE_ADMIN_CLIENT_EMAIL`
+- `FIREBASE_ADMIN_PRIVATE_KEY` (use literal `\n` for newlines)
+
+4) Redeploy.
+
+Note: This repo includes a `vercel.json` that ensures SPA routes like `/api-doc` work on refresh.
+
 ## Swagger / API Docs
 
 - Sign in
